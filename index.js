@@ -65,7 +65,7 @@ const height = 600;
         .attr("stroke", "#900")
         .attr("stroke-width", d => Math.sqrt(d.weight));
 
-    // --- Info panel: shows episodes when a node is clicked ---
+    // info panel: shows episodes when a node is clicked
     const infoPanel = d3.select("#info-panel");
 
     const node = svg.selectAll("circle")
@@ -125,7 +125,8 @@ const height = 600;
         .text(d => d.name)
         .attr("font-size", "10px")
         .attr("dx", 8)
-        .attr("dy", 3);
+        .attr("dy", 3)
+        .style("pointer-events", "none");
 
     const simulation = d3.forceSimulation(graph.nodes)
         .force("link",
