@@ -1,5 +1,4 @@
 // what's left to do:
-// - animations (click on node to show first ten episodes character appreared in,)
 // - cleaning up labels and size of graph on screen
 // - we could add dragging nodes around to make graph more interactive
 
@@ -25,7 +24,7 @@ Promise.all([
     );
     nodes.forEach(node => {
         const eps = episodesByCharacter.get(node.id) || [];
-        node.episodes = eps.map(d => d.episode);
+        node.episodes = eps.map(d => d.episode_id);
         node.numEpisodes = node.episodes.length;
     });
 
@@ -66,12 +65,58 @@ const height = 600;
         .attr("stroke", "#900")
         .attr("stroke-width", d => Math.sqrt(d.weight));
 
+    // --- Info panel: shows episodes when a node is clicked ---
+    const infoPanel = d3.select("#info-panel");
+
     const node = svg.selectAll("circle")
         .data(graph.nodes)
         .enter()
         .append("circle")
         .attr("fill", "#09f")
-        .attr("r", 5);
+        .attr("r", 5)
+        .style("cursor", "pointer")
+        .on("click", function(event, d) {
+            // Highlight selected node
+            svg.selectAll("circle")
+                .attr("fill", "#09f")
+                .attr("r", 5);
+            d3.select(this)
+                .attr("fill", "#f90")
+                .attr("r", 8);
+
+            // Build episode list (first 10)
+            const first10 = d.episodes.slice(0, 10);
+
+            infoPanel.html(""); // clear previous content
+
+            infoPanel.append("h2").text(d.name);
+
+            infoPanel.append("p")
+                .text(`Total episodes: ${d.numEpisodes}`);
+
+            infoPanel.append("p")
+                .style("font-weight", "bold")
+                .text("First 10 episodes appeared in:");
+
+            if (first10.length === 0) {
+                infoPanel.append("p").text("No episode data available.");
+            } else {
+                const ul = infoPanel.append("ul");
+                first10.forEach(ep => {
+                    ul.append("li").text(`Episode ${ep}`);
+                });
+            }
+
+            // Show a "close" button
+            infoPanel.append("button")
+                .text("✕ Clear")
+                .on("click", () => {
+                    infoPanel.html("");
+                    svg.selectAll("circle")
+                        .attr("fill", "#09f")
+                        .attr("r", 5);
+                });
+        });
 
     const label = svg.selectAll("text")
         .data(graph.nodes)
@@ -82,19 +127,6 @@ const height = 600;
         .attr("dx", 8)
         .attr("dy", 3);
 
-    console.log("Before simulation");
-
-    const nodeIds = new Set(nodes.map(d => String(d.id)));
-
-    links.forEach(link => {
-        if (!nodeIds.has(link.source) || !nodeIds.has(link.target)) {
-            console.log("Broken link:", link);
-        }
-    });
-
-    console.log("After checking links");
-
-
     const simulation = d3.forceSimulation(graph.nodes)
         .force("link",
              d3.forceLink(graph.links)
@@ -103,8 +135,6 @@ const height = 600;
         )
         .force("charge", d3.forceManyBody().strength(-500))
         .force("center", d3.forceCenter(width/2, height/2));
-
-    console.log("check1");
 
     simulation.on("tick", () => {
         link
@@ -122,9 +152,7 @@ const height = 600;
         .attr("y", d => d.y);
     });
 
-    console.log("hello?");
-
     console.log(graph);
     console.log(graph.nodes[0]);
 
-}); 
+});

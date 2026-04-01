@@ -7,9 +7,65 @@
   <!-- Load D3 -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
 
+  <link rel="stylesheet" href="style.css">
+
   <style>
+    body {
+      font-family: sans-serif;
+      margin: 16px;
+    }
+    #container {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
     svg {
       border: 1px solid #ccc;
+      flex-shrink: 0;
+    }
+    #info-panel {
+      min-width: 220px;
+      max-width: 280px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 16px;
+      background: #f9f9f9;
+      min-height: 100px;
+    }
+    #info-panel h2 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      color: #333;
+    }
+    #info-panel p {
+      margin: 4px 0;
+      font-size: 13px;
+    }
+    #info-panel ul {
+      margin: 6px 0 12px 0;
+      padding-left: 20px;
+      font-size: 13px;
+    }
+    #info-panel li {
+      margin-bottom: 3px;
+    }
+    #info-panel button {
+      margin-top: 8px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      background: #fff;
+    }
+    #info-panel button:hover {
+      background: #eee;
+    }
+    #hint {
+      color: #888;
+      font-size: 13px;
+      font-style: italic;
+      margin: 4px 0 12px 0;
     }
   </style>
 </head>
@@ -17,9 +73,15 @@
 <body>
 
   <h1>Simpsons Network Visualization</h1>
+  <p id="hint">Click on a node to see the character's first 10 episodes.</p>
 
-  <!-- This is where your graph will go -->
-  <svg width="800" height="600"></svg>
+  <div id="container">
+    <!-- Graph -->
+    <svg width="800" height="600"></svg>
+
+    <!-- Episode info panel -->
+    <div id="info-panel"></div>
+  </div>
 
   <!-- Link your JS file -->
   <script src="index.js"></script>
