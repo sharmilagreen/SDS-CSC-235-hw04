@@ -1,5 +1,4 @@
 // what's left to do:
-// - cleaning up labels and size of graph on screen
 // - we could add dragging nodes around to make graph more interactive
 
 // Loading network data:
@@ -51,8 +50,8 @@ const filteredLinks = links.filter(l =>
 const graph = { nodes: filteredNodes, links: filteredLinks };
 
 // drawing graph object!
-const width = 800;
-const height = 600;
+const width = 1300;
+const height = 800;
 
     const svg = d3.select("svg")
         .attr("width", width)
@@ -68,6 +67,11 @@ const height = 600;
     // info panel: shows episodes when a node is clicked
     const infoPanel = d3.select("#info-panel");
 
+    function resetHighlights() {
+        node.attr("fill", "#09f").attr("r", 5).attr("opacity", 1);
+        link.attr("stroke", "#900").attr("opacity", 1);
+    }
+
     const node = svg.selectAll("circle")
         .data(graph.nodes)
         .enter()
@@ -76,45 +80,56 @@ const height = 600;
         .attr("r", 5)
         .style("cursor", "pointer")
         .on("click", function(event, d) {
-            // Highlight selected node
-            svg.selectAll("circle")
-                .attr("fill", "#09f")
-                .attr("r", 5);
-            d3.select(this)
-                .attr("fill", "#f90")
-                .attr("r", 8);
-
-            // Build episode list (first 10)
+            resetHighlights();
+        
+            const neighborIds = new Set();
+            graph.links.forEach(l => {
+                const srcId = l.source.id || l.source;
+                const tgtId = l.target.id || l.target;
+                if (srcId === d.id) neighborIds.add(tgtId);
+                if (tgtId === d.id) neighborIds.add(srcId);
+            });
+        
+            node
+                .attr("opacity", n => (n.id === d.id || neighborIds.has(n.id)) ? 1 : 0.15)
+                .attr("fill", n => {
+                    if (n.id === d.id) return "#f90";
+                    if (neighborIds.has(n.id)) return "#0c0";
+                    return "#09f";
+                })
+                .attr("r", n => (n.id === d.id) ? 8 : 5);
+        
+            link
+                .attr("opacity", l => {
+                    const srcId = l.source.id || l.source;
+                    const tgtId = l.target.id || l.target;
+                    return (srcId === d.id || tgtId === d.id) ? 1 : 0.05;
+                })
+                .attr("stroke", l => {
+                    const srcId = l.source.id || l.source;
+                    const tgtId = l.target.id || l.target;
+                    return (srcId === d.id || tgtId === d.id) ? "#f90" : "#900";
+                });
+        
             const first10 = d.episodes.slice(0, 10);
-
-            infoPanel.html(""); // clear previous content
-
+            infoPanel.html("");
             infoPanel.append("h2").text(d.name);
-
-            infoPanel.append("p")
-                .text(`Total episodes: ${d.numEpisodes}`);
-
-            infoPanel.append("p")
-                .style("font-weight", "bold")
-                .text("First 10 episodes appeared in:");
-
+            infoPanel.append("p").text("Total episodes: " + d.numEpisodes);
+            infoPanel.append("p").text("Connected to " + neighborIds.size + " character(s).");
+            infoPanel.append("p").style("font-weight", "bold").text("First 10 episodes:");
+        
             if (first10.length === 0) {
                 infoPanel.append("p").text("No episode data available.");
             } else {
                 const ul = infoPanel.append("ul");
-                first10.forEach(ep => {
-                    ul.append("li").text(`Episode ${ep}`);
-                });
+                first10.forEach(ep => { ul.append("li").text("Episode " + ep); });
             }
-
-            // Show a "close" button
+        
             infoPanel.append("button")
-                .text("✕ Clear")
+                .text("Clear")
                 .on("click", () => {
                     infoPanel.html("");
-                    svg.selectAll("circle")
-                        .attr("fill", "#09f")
-                        .attr("r", 5);
+                    resetHighlights();
                 });
         });
 
