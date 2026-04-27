@@ -50,14 +50,39 @@ const filteredLinks = links.filter(l =>
 const graph = { nodes: filteredNodes, links: filteredLinks };
 
 // drawing graph object!
-const width = 1300;
-const height = 800;
+const width = 800;
+const height = 600;
+const margin = { top: 50 };
 
-    const svg = d3.select("svg")
-        .attr("width", width)
-        .attr("height", height);
 
-    const link = svg.selectAll("line")
+const svg = d3.select("svg")
+     .attr("width", width)
+    .attr("height", height + margin.top);
+
+// title:
+svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", 30)
+        .attr("text-anchor", "middle")
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "20px")
+        .attr("font-weight", "bold")
+        .attr("fill", "#333")
+        .text("The Simpsons Character Network");
+
+svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", 50)
+        .attr("text-anchor", "middle")
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "12px")
+        .attr("fill", "#666")
+        .text("Top 10% best connected characters; select node to see episode details" );
+
+const g = svg.append("g")
+    .attr("transform", `translate(0, ${margin.top})`);
+
+    const link = g.selectAll("line")
         .data(graph.links)
         .enter()
         .append("line")
